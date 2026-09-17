@@ -47,7 +47,12 @@ class Settings(BaseSettings):
     langsmith_project: str = "recipe-bot"
 
     # Media
-    media_root: str = "/app/media"
+    # A relative path by default so importing the app never requires
+    # filesystem-root write access (breaks in CI, and on any host where
+    # /app isn't a container's own writable directory). Docker deploys
+    # set MEDIA_ROOT=/app/media explicitly via their own env — this
+    # default only matters when nothing overrides it.
+    media_root: str = "media"
 
     # Web search tool
     web_search_provider: str = "duckduckgo"

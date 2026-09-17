@@ -60,6 +60,11 @@ jobs:
           DATABASE_URL_SYNC: "postgresql://user:pass@localhost/db"
           UPSTASH_REDIS_URL: "redis://localhost:6379"
           QDRANT_URL: "http://localhost:6333"
+          # Without this, main.py's os.makedirs() falls back to
+          # config.py's default and tries to create a folder at
+          # filesystem root, which the CI runner has no permission to
+          # do. A relative path is always safe to create here.
+          MEDIA_ROOT: "media"
         run: python -c "from app.main import app; print('App imported successfully')"
 
       # No pytest step: there are currently no test_*.py files in this
