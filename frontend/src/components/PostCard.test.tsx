@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PostCard } from "./PostCard";
@@ -64,13 +65,12 @@ describe("PostCard", () => {
     expect(likeButton).toHaveAttribute("aria-pressed", "false");
   });
 
-  it("flips the heart and count instantly, before the debounce window (and any network call) fires", async () => {
+  it("flips the heart and count instantly, before the debounce window (and any network call) fires", () => {
     vi.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<PostCard post={makePost({ liked_by_me: false, like_count: 3 })} />);
 
     const likeButton = screen.getByRole("button", { name: /^like/i });
-    await user.click(likeButton);
+    fireEvent.click(likeButton);
 
     // Instant, optimistic UI flip — no network call yet.
     expect(likeButton).toHaveAttribute("aria-pressed", "true");
@@ -83,14 +83,13 @@ describe("PostCard", () => {
 
   it("coalesces rapid like/unlike/like clicks into a single request reflecting the final choice", async () => {
     vi.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockedLike.mockResolvedValue({ post_id: "post-1", like_count: 4 });
     render(<PostCard post={makePost({ liked_by_me: false, like_count: 3 })} />);
 
     const likeButton = screen.getByRole("button", { name: /^like/i });
-    await user.click(likeButton); // like
-    await user.click(likeButton); // unlike
-    await user.click(likeButton); // like again — final desired state is "liked"
+    fireEvent.click(likeButton); // like
+    fireEvent.click(likeButton); // unlike
+    fireEvent.click(likeButton); // like again — final desired state is "liked"
 
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS + 10);
 
@@ -102,19 +101,18 @@ describe("PostCard", () => {
 
   it("resets the debounce timer on each click, so it only fires 350ms after the LAST click", async () => {
     vi.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockedLike.mockResolvedValue({ post_id: "post-1", like_count: 4 });
     render(<PostCard post={makePost({ liked_by_me: false, like_count: 3 })} />);
 
     const likeButton = screen.getByRole("button", { name: /^like/i });
-    await user.click(likeButton);
+    fireEvent.click(likeButton);
 
     // Advance most, but not all, of the debounce window, then click again.
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS - 50);
     expect(mockedLike).not.toHaveBeenCalled();
 
-    await user.click(likeButton); // unlike — resets the timer
-    await user.click(likeButton); // like again — resets again
+    fireEvent.click(likeButton); // unlike — resets the timer
+    fireEvent.click(likeButton); // like again — resets again
 
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS - 50);
     expect(mockedLike).not.toHaveBeenCalled(); // still hasn't fired
@@ -127,12 +125,11 @@ describe("PostCard", () => {
 
   it("rolls back the optimistic increment and shows an error on a failed like", async () => {
     vi.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockedLike.mockRejectedValue(new ApiError(500, "Server error"));
     render(<PostCard post={makePost({ liked_by_me: false, like_count: 6 })} />);
 
     const likeButton = screen.getByRole("button", { name: /^like/i });
-    await user.click(likeButton);
+    fireEvent.click(likeButton);
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS + 10);
 
     vi.useRealTimers();
@@ -143,12 +140,11 @@ describe("PostCard", () => {
 
   it("unlikes an already-liked post: heart empties, count decrements, DELETE is called after the debounce", async () => {
     vi.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockedUnlike.mockResolvedValue({ post_id: "post-1", like_count: 5 });
     render(<PostCard post={makePost({ liked_by_me: true, like_count: 6 })} />);
 
     const likeButton = screen.getByRole("button", { name: /unlike/i });
-    await user.click(likeButton);
+    fireEvent.click(likeButton);
 
     expect(likeButton).toHaveAttribute("aria-pressed", "false");
     expect(likeButton).toHaveTextContent("5");
@@ -163,12 +159,11 @@ describe("PostCard", () => {
 
   it("rolls back the optimistic decrement and shows an error on a failed unlike", async () => {
     vi.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockedUnlike.mockRejectedValue(new ApiError(500, "Server error"));
     render(<PostCard post={makePost({ liked_by_me: true, like_count: 6 })} />);
 
     const likeButton = screen.getByRole("button", { name: /unlike/i });
-    await user.click(likeButton);
+    fireEvent.click(likeButton);
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS + 10);
 
     vi.useRealTimers();
