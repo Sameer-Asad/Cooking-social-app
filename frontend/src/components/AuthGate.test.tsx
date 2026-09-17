@@ -18,13 +18,13 @@ describe("AuthGate", () => {
     expect(onSignup).not.toHaveBeenCalled();
   });
 
-  it("switches to signup mode and calls onSignup, not onLogin", async () => {
+  it("switches to signup mode via the tab and calls onSignup, not onLogin", async () => {
     const user = userEvent.setup();
     const onLogin = vi.fn().mockResolvedValue(undefined);
     const onSignup = vi.fn().mockResolvedValue(undefined);
     render(<AuthGate onLogin={onLogin} onSignup={onSignup} error={null} />);
 
-    await user.click(screen.getByText(/New here\? Create an account/));
+    await user.click(screen.getByRole("tab", { name: "Sign up" }));
     await user.type(screen.getByPlaceholderText("Email"), "new@example.com");
     await user.type(screen.getByPlaceholderText("Password"), "another-password");
     await user.click(screen.getByRole("button", { name: "Sign up" }));
@@ -33,12 +33,12 @@ describe("AuthGate", () => {
     expect(onLogin).not.toHaveBeenCalled();
   });
 
-  it("toggles back to login mode when clicked twice", async () => {
+  it("toggles back to login mode when the Login tab is clicked", async () => {
     const user = userEvent.setup();
     render(<AuthGate onLogin={vi.fn()} onSignup={vi.fn()} error={null} />);
-    await user.click(screen.getByText(/New here\? Create an account/));
+    await user.click(screen.getByRole("tab", { name: "Sign up" }));
     expect(screen.getByRole("button", { name: "Sign up" })).toBeInTheDocument();
-    await user.click(screen.getByText(/Already have an account\? Sign in/));
+    await user.click(screen.getByRole("tab", { name: "Login" }));
     expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
   });
 

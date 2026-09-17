@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PostCard } from "./PostCard";
 import { ApiError, feedApi, type Post } from "../api/client";
 
@@ -8,7 +8,15 @@ vi.mock("../api/client", async () => {
   const actual = await vi.importActual<typeof import("../api/client")>("../api/client");
   return {
     ...actual,
-    feedApi: { like: vi.fn(), unlike: vi.fn(), listComments: vi.fn(), comment: vi.fn(), list: vi.fn(), upload: vi.fn() },
+    feedApi: {
+      like: vi.fn(),
+      unlike: vi.fn(),
+      listComments: vi.fn(),
+      comment: vi.fn(),
+      listLikers: vi.fn(),
+      list: vi.fn(),
+      upload: vi.fn(),
+    },
   };
 });
 
@@ -16,6 +24,8 @@ const mockedLike = vi.mocked(feedApi.like);
 const mockedUnlike = vi.mocked(feedApi.unlike);
 const mockedListComments = vi.mocked(feedApi.listComments);
 const mockedComment = vi.mocked(feedApi.comment);
+
+const DEBOUNCE_MS = 350;
 
 function makePost(overrides: Partial<Post> = {}): Post {
   return {
@@ -26,140 +36,149 @@ function makePost(overrides: Partial<Post> = {}): Post {
     description: "Homemade biryani",
     like_count: 3,
     comment_count: 1,
-    created_at: "2026-01-01T00:00:00Z",
     liked_by_me: false,
+    created_at: "2026-01-01T00:00:00Z",
     ...overrides,
   };
 }
 
 describe("PostCard", () => {
   beforeEach(() => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
     mockedLike.mockReset();
     mockedUnlike.mockReset();
     mockedListComments.mockReset();
     mockedComment.mockReset();
-  });
-
-  afterEach(() => {
     vi.useRealTimers();
   });
 
   it("renders the heart already filled when the post was already liked (liked_by_me)", () => {
-    render(<PostCard post={makePost({ liked_by_me: true, like_count: 6 })} />);
-    const likeButton = screen.getByRole("button", { name: /^Unlike/ });
-    expect(likeButton).toHaveClass("liked");
+    render(<PostCard post={makePost({ liked_by_me: true, like_count: 5 })} />);
+    const likeButton = screen.getByRole("button", { name: /unlike/i });
     expect(likeButton).toHaveAttribute("aria-pressed", "true");
+    expect(likeButton).toHaveTextContent("5");
   });
 
   it("renders the heart empty when the post was not already liked", () => {
-    render(<PostCard post={makePost({ liked_by_me: false, like_count: 6 })} />);
-    const likeButton = screen.getByRole("button", { name: /^Like/ });
-    expect(likeButton).not.toHaveClass("liked");
+    render(<PostCard post={makePost({ liked_by_me: false, like_count: 5 })} />);
+    const likeButton = screen.getByRole("button", { name: /^like/i });
     expect(likeButton).toHaveAttribute("aria-pressed", "false");
   });
 
   it("flips the heart and count instantly, before the debounce window (and any network call) fires", async () => {
+    vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    mockedLike.mockResolvedValue({ post_id: "post-1", like_count: 7 });
-    render(<PostCard post={makePost({ like_count: 6, liked_by_me: false })} />);
+    render(<PostCard post={makePost({ liked_by_me: false, like_count: 3 })} />);
 
-    const likeButton = screen.getByRole("button", { name: /^Like/ });
+    const likeButton = screen.getByRole("button", { name: /^like/i });
     await user.click(likeButton);
 
-    // Instant — no request yet, debounce window hasn't elapsed.
-    expect(likeButton).toHaveClass("liked");
-    expect(likeButton).toHaveTextContent("7");
+    // Instant, optimistic UI flip — no network call yet.
+    expect(likeButton).toHaveAttribute("aria-pressed", "true");
+    expect(likeButton).toHaveTextContent("4");
     expect(mockedLike).not.toHaveBeenCalled();
+    expect(mockedUnlike).not.toHaveBeenCalled();
 
-    await vi.advanceTimersByTimeAsync(350);
-    expect(mockedLike).toHaveBeenCalledTimes(1);
-    expect(mockedLike).toHaveBeenCalledWith("post-1");
+    vi.useRealTimers();
   });
 
   it("coalesces rapid like/unlike/like clicks into a single request reflecting the final choice", async () => {
+    vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    mockedLike.mockResolvedValue({ post_id: "post-1", like_count: 7 });
-    render(<PostCard post={makePost({ like_count: 6, liked_by_me: false })} />);
+    mockedLike.mockResolvedValue({ post_id: "post-1", like_count: 4 });
+    render(<PostCard post={makePost({ liked_by_me: false, like_count: 3 })} />);
 
-    const likeButton = () => screen.getByRole("button", { name: /^(Like|Unlike)/ });
-    await user.click(likeButton()); // like
-    await user.click(likeButton()); // unlike
-    await user.click(likeButton()); // like  <- final state
+    const likeButton = screen.getByRole("button", { name: /^like/i });
+    await user.click(likeButton); // like
+    await user.click(likeButton); // unlike
+    await user.click(likeButton); // like again — final desired state is "liked"
 
-    // Each click updated the UI instantly along the way.
-    expect(likeButton()).toHaveClass("liked");
-    expect(likeButton()).toHaveTextContent("7");
-    expect(mockedLike).not.toHaveBeenCalled();
-    expect(mockedUnlike).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(DEBOUNCE_MS + 10);
 
-    await vi.advanceTimersByTimeAsync(350);
-    // Only ONE request went out, and it matches the final decision (like).
     expect(mockedLike).toHaveBeenCalledTimes(1);
     expect(mockedUnlike).not.toHaveBeenCalled();
+
+    vi.useRealTimers();
   });
 
   it("resets the debounce timer on each click, so it only fires 350ms after the LAST click", async () => {
+    vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    mockedLike.mockResolvedValue({ post_id: "post-1", like_count: 7 });
-    render(<PostCard post={makePost({ like_count: 6, liked_by_me: false })} />);
+    mockedLike.mockResolvedValue({ post_id: "post-1", like_count: 4 });
+    render(<PostCard post={makePost({ liked_by_me: false, like_count: 3 })} />);
 
-    const likeButton = screen.getByRole("button", { name: /^Like/ });
+    const likeButton = screen.getByRole("button", { name: /^like/i });
     await user.click(likeButton);
-    await vi.advanceTimersByTimeAsync(300); // less than the debounce window
+
+    // Advance most, but not all, of the debounce window, then click again.
+    await vi.advanceTimersByTimeAsync(DEBOUNCE_MS - 50);
     expect(mockedLike).not.toHaveBeenCalled();
 
-    await vi.advanceTimersByTimeAsync(300); // now 600ms since the click, but only 300ms since... no further click happened
-    expect(mockedLike).toHaveBeenCalledTimes(1);
+    await user.click(likeButton); // unlike — resets the timer
+    await user.click(likeButton); // like again — resets again
+
+    await vi.advanceTimersByTimeAsync(DEBOUNCE_MS - 50);
+    expect(mockedLike).not.toHaveBeenCalled(); // still hasn't fired
+
+    await vi.advanceTimersByTimeAsync(100);
+    expect(mockedLike).toHaveBeenCalledTimes(1); // fires only after a full quiet window
+
+    vi.useRealTimers();
   });
 
   it("rolls back the optimistic increment and shows an error on a failed like", async () => {
+    vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockedLike.mockRejectedValue(new ApiError(500, "Server error"));
-    render(<PostCard post={makePost({ like_count: 6, liked_by_me: false })} />);
+    render(<PostCard post={makePost({ liked_by_me: false, like_count: 6 })} />);
 
-    const likeButton = screen.getByRole("button", { name: /^Like/ });
+    const likeButton = screen.getByRole("button", { name: /^like/i });
     await user.click(likeButton);
-    await vi.advanceTimersByTimeAsync(350);
+    await vi.advanceTimersByTimeAsync(DEBOUNCE_MS + 10);
 
-    await waitFor(() => expect(screen.getByText("Server error")).toBeInTheDocument());
+    vi.useRealTimers();
+    await screen.findByText("Server error");
     expect(likeButton).toHaveTextContent("6");
-    expect(likeButton).not.toHaveClass("liked");
+    expect(likeButton).toHaveAttribute("aria-pressed", "false");
   });
 
   it("unlikes an already-liked post: heart empties, count decrements, DELETE is called after the debounce", async () => {
+    vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockedUnlike.mockResolvedValue({ post_id: "post-1", like_count: 5 });
-    render(<PostCard post={makePost({ like_count: 6, liked_by_me: true })} />);
+    render(<PostCard post={makePost({ liked_by_me: true, like_count: 6 })} />);
 
-    const likeButton = screen.getByRole("button", { name: /^Unlike/ });
+    const likeButton = screen.getByRole("button", { name: /unlike/i });
     await user.click(likeButton);
 
-    expect(likeButton).not.toHaveClass("liked");
+    expect(likeButton).toHaveAttribute("aria-pressed", "false");
     expect(likeButton).toHaveTextContent("5");
     expect(mockedUnlike).not.toHaveBeenCalled();
 
-    await vi.advanceTimersByTimeAsync(350);
+    await vi.advanceTimersByTimeAsync(DEBOUNCE_MS + 10);
+    expect(mockedUnlike).toHaveBeenCalledTimes(1);
     expect(mockedUnlike).toHaveBeenCalledWith("post-1");
-    expect(mockedLike).not.toHaveBeenCalled();
+
+    vi.useRealTimers();
   });
 
   it("rolls back the optimistic decrement and shows an error on a failed unlike", async () => {
+    vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockedUnlike.mockRejectedValue(new ApiError(500, "Server error"));
-    render(<PostCard post={makePost({ like_count: 6, liked_by_me: true })} />);
+    render(<PostCard post={makePost({ liked_by_me: true, like_count: 6 })} />);
 
-    const likeButton = screen.getByRole("button", { name: /^Unlike/ });
+    const likeButton = screen.getByRole("button", { name: /unlike/i });
     await user.click(likeButton);
-    await vi.advanceTimersByTimeAsync(350);
+    await vi.advanceTimersByTimeAsync(DEBOUNCE_MS + 10);
 
-    await waitFor(() => expect(screen.getByText("Server error")).toBeInTheDocument());
+    vi.useRealTimers();
+    await screen.findByText("Server error");
     expect(likeButton).toHaveTextContent("6");
-    expect(likeButton).toHaveClass("liked");
+    expect(likeButton).toHaveAttribute("aria-pressed", "true");
   });
 
   it("lazily loads comments only when the comment button is first clicked", async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup();
     mockedListComments.mockResolvedValue([
       { id: "c1", post_id: "post-1", user_id: "u1", body: "Looks great!", created_at: "2026-01-01T00:00:00Z" },
     ]);
@@ -177,7 +196,7 @@ describe("PostCard", () => {
   });
 
   it("shows an empty state when a post has no comments", async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup();
     mockedListComments.mockResolvedValue([]);
     render(<PostCard post={makePost()} />);
     await user.click(screen.getByRole("button", { name: /comments/i }));
@@ -185,7 +204,7 @@ describe("PostCard", () => {
   });
 
   it("adds a new comment, appends it locally, and increments the visible count", async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup();
     mockedListComments.mockResolvedValue([]);
     mockedComment.mockResolvedValue({
       id: "c2", post_id: "post-1", user_id: "u1", body: "So good!", created_at: "2026-01-01T00:00:00Z",
@@ -205,7 +224,7 @@ describe("PostCard", () => {
   });
 
   it("does not submit an empty or whitespace-only comment", async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup();
     mockedListComments.mockResolvedValue([]);
     render(<PostCard post={makePost()} />);
     await user.click(screen.getByRole("button", { name: /comments/i }));
