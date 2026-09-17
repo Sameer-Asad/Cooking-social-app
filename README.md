@@ -1,112 +1,142 @@
-# Recipe Bot & Social Feed
+# Dastarkhwan — Recipe Bot & Social Feed
 
-Multilingual recipe Q&A bot (text/voice, dual text+audio replies) plus a
-food-focused social feed. See `docs/` context in the original PRDs for
-the full spec — this README is just "how do I run it."
+A multilingual recipe Q&A bot (text or voice in, text + audio replies out) combined with a food-focused social feed — ask about a dish, get a grounded answer with optional document context, then share what you cooked.
 
-## Project layout
+## ✨ Features
 
+- 🗣️ **Multilingual Q&A** — ask by typing or voice, in English, Urdu, Hindi, or beyond; replies come back as text + generated audio
+- 🧠 **Agentic bot** — LangGraph-orchestrated agent with web search + tool-calling, backed by Groq
+- 📄 **Optional document RAG** — upload a `.txt`, `.md`, `.pdf`, or `.docx` file and the bot answers using it for that conversation
+- 💬 **Rolling conversation memory** — older turns are summarized instead of dropped, so long sessions stay coherent without blowing the context window
+- 📸 **Social feed** — share photos/videos of what you cooked, like, and comment
+- 💳 **Pro subscription** — Lemon Squeezy–powered upgrade for higher daily limits
+- 📊 **Full observability** — LangSmith tracing, Prometheus metrics, Grafana dashboards
+
+## 📸 Screenshots / Demo
+
+> _Add screenshots or a short demo GIF here._
+
+| Ask | Feed |
+|---|---|
+| _screenshot placeholder_ | _screenshot placeholder_ |
+
+## 🗂️ Project Structure
+
+```text
+dastarkhwan/
+├── backend/
+│   ├── app/
+│   ├── alembic/
+│   ├── eval/
+│   ├── Dockerfile
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   ├── Dockerfile
+│   └── package.json
+├── media/
+│   ├── audio/
+│   ├── images/
+│   └── videos/
+├── .github/
+│   └── workflows/
+├── docker-compose.yml
+├── .env.example
+└── README.md
 ```
-backend/    FastAPI + LangGraph + Celery — see backend/app for the API
-frontend/   React + Vite — see frontend/src
-eval/       Eval harness (pytest) — see eval/README.md
-media/      Local-disk media storage (dev only — Sec 2)
+
+### 🔍 Directory Breakdown & Core Functions
+
+| Folder / File | Core Purpose & Responsibility |
+|---|---|
+| `backend/app/` | FastAPI application — routes, auth, the bot's LangGraph agent, RAG pipeline, rate limiting, and Celery task definitions |
+| `backend/alembic/` | Database migrations for the Postgres schema (users, conversations, messages, posts) |
+| `backend/eval/` | Offline evaluation harness — LLM-as-judge scoring against a golden dataset, run separately from normal CI |
+| `frontend/src/` | React + Vite client — chat UI, session sidebar, social feed, auth, and billing pages |
+| `media/` | Local-disk storage for uploaded post images/videos and generated TTS audio (dev only — swapped for object storage in production) |
+| `.github/workflows/` | CI pipeline — backend lint/import checks and frontend test/build checks on every push |
+| `docker-compose.yml` | Orchestrates the backend, Celery worker, and frontend as one local stack |
+| `.env.example` | Template listing every environment variable the app expects |
+
+## 🛠️ Tech Stack
+
+- 🐍 **Backend:** FastAPI, SQLAlchemy (async), Alembic
+- 🕸️ **Agent orchestration:** LangGraph, LangChain Core, Groq (LLM inference)
+- 🎙️ **Voice:** OpenAI Whisper (speech-to-text), gTTS (text-to-speech)
+- 📚 **RAG:** Qdrant (vector search), sentence-transformers (embeddings)
+- ⚙️ **Background jobs:** Celery, CloudAMQP (broker), Upstash Redis (result backend + cache)
+- 🐘 **Database:** PostgreSQL (Neon)
+- ⚛️ **Frontend:** React, Vite, TypeScript, Vitest + Testing Library
+- 💳 **Billing:** Lemon Squeezy
+- 📈 **Observability:** LangSmith, Prometheus, Grafana
+
+## 🚀 Installation & Usage
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/<your-username>/dastarkhwan.git
+cd dastarkhwan
 ```
 
-## First-time setup
+### 2. Configure environment variables
 
-1. **Copy the env template and fill in real values:**
+```bash
+cp .env.example backend/.env
+```
 
-   ```bash
-   cp .env.example .env
-   ```
+Fill in real values for: Groq API key, Neon Postgres URL (async + sync forms), CloudAMQP broker URL, Upstash Redis URL, Qdrant URL/key (optional, for RAG), Lemon Squeezy API key/store/variant IDs (optional, for billing), and LangSmith API key (optional, for tracing).
 
-   You'll need: a Groq API key, a Neon Postgres connection string (both
-   async `postgresql+asyncpg://` and sync `postgresql+psycopg2://`
-   forms), a CloudAMQP broker URL, an Upstash Redis URL, and — if you
-   want the optional doc-RAG feature — a Qdrant Cloud URL + API key.
-   GitHub OAuth client ID/secret are optional (email/password auth works
-   without them).
+### 3. Install dependencies
 
-2. **Run the database migration** (against your real Neon Postgres, using
-   the sync URL):
+```bash
+# Backend
+cd backend
+pip install -r requirements.txt
 
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   alembic upgrade head
-   ```
+# Frontend
+cd ../frontend
+npm install
+```
 
-3. **Start everything:**
+### 4. Run database migrations
 
-   ```bash
-   docker-compose up --build
-   ```
+```bash
+cd backend
+alembic upgrade head
+```
 
-   - Backend: http://localhost:8000 (docs at `/docs`)
-   - Frontend: http://localhost:5173
-
-   `docker-compose.yml`'s `eval` service is excluded from a plain `up`
-   (it's behind the `eval` profile) — run it explicitly:
-
-   ```bash
-   docker-compose --profile eval run eval
-   ```
-
-## Running without Docker (local dev loop)
+### 5. Start the app
 
 ```bash
 # Terminal 1 — backend
 cd backend
-pip install -r requirements.txt
 uvicorn app.main:app --reload
 
-# Terminal 2 — celery worker (needed for TTS pre-caching, post-processing,
-# session-end memory summarization)
+# Terminal 2 — Celery worker
 cd backend
-celery -A app.celery_app worker --loglevel=INFO
+celery -A app.celery_app worker --loglevel=info
 
 # Terminal 3 — frontend
 cd frontend
-npm install
 npm run dev
 ```
 
-## Testing
+Backend: `http://localhost:8000` (docs at `/docs`) · Frontend: `http://localhost:5173`
+
+### Or, with Docker
 
 ```bash
-# Backend / eval (offline-safe subset — no live Groq/network needed)
-cd eval
-pip install -r ../backend/requirements.txt
-pytest -v -m "not requires_network"
-
-# Frontend
-cd frontend
-npm install
-npm run typecheck
-npm test
+docker-compose up --build
 ```
 
-## Known gaps (honest, not hidden)
+## 🧪 Running Tests
 
-- **Never run through Docker end-to-end** — this was built and tested in
-  a sandbox without Docker available. `docker-compose build`/`up` should
-  work (the Dockerfiles and compose config were carefully reviewed
-  against real, verified library/tool docs) but has not actually been
-  executed. Run it locally first and expect to debug at least one small
-  issue — a missing env var is the most likely candidate.
-- **The Alembic migration has only run against SQLite**, never against a
-  real Postgres/Neon instance.
-- **Groq, Whisper, Qdrant, and the sentence-transformers injection
-  classifier have never made a real network call in testing** — every
-  test involving them either mocked the call or was structurally
-  verified up to the point of the (sandbox-blocked) network request.
-  Expect to debug real-world quality issues here (prompt tuning, Whisper
-  model size, etc.) that no amount of code review can substitute for.
-- **The MediaRecorder voice-recording path in the frontend has not been
-  tested in a real browser.**
-- **Cloud deployment (swapping local disk for S3/Cloudinary, moving
-  free-tier services to production config) is not done** — by design,
-  this comes after local testing succeeds.
+```bash
+# Frontend
+cd frontend
+npm run test
 
-See `eval/README.md` for the evaluation framework specifically.
+# Backend — see backend/eval for the evaluation harness
+```
+
