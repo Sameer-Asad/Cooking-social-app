@@ -1,0 +1,99 @@
+# Eval suite configuration for Dastarkhwan.
+# Judge model for all DeepEval + custom G-Eval metrics: Gemini via
+# `deepeval set-gemini --save` (reads GOOGLE_API_KEY from env).
+# Previously: Groq via LiteLLM (groq/llama-3.3-70b-versatile) — switched
+# due to Groq free-tier quota exhaustion.
+# CLI: deepeval set-gemini --model=gemini-2.5-flash --save
+
+judge_model: "cohere/command-a-03-2025"
+categories:
+  retriever:
+    dataset: golden_datasets/retriever.jsonl
+    metrics:
+      - name: context_precision
+        type: deepeval_native
+        class: ContextualPrecisionMetric
+      - name: context_recall
+        type: deepeval_native
+        class: ContextualRecallMetric
+      - name: retrieval_latency_p95
+        type: custom_deterministic
+        implementation: harness/common/metrics.py::measure_retrieval_latency
+
+  generator:
+    dataset: golden_datasets/generator.jsonl
+    metrics:
+      - name: faithfulness
+        type: deepeval_native
+        class: FaithfulnessMetric
+      - name: language_match_accuracy
+        type: custom_deterministic
+        implementation: harness/common/metrics.py::language_match_accuracy
+      - name: recipe_correctness
+        type: custom_geval
+        implementation: harness/common/custom_geval.py::recipe_correctness_metric
+
+  agent:
+    dataset: golden_datasets/agent.jsonl
+    metrics:
+      - name: tool_selection_accuracy
+        type: deepeval_native
+        class: ToolCorrectnessMetric
+      - name: tool_call_success_rate
+        type: deepeval_native
+        class: ArgumentCorrectnessMetric
+      - name: loop_termination_rate
+        type: custom_deterministic
+        implementation: harness/common/metrics.py::loop_termination_rate
+
+  safety:
+    dataset: golden_datasets/safety.jsonl
+    metrics:
+      - name: prompt_injection_precision_recall
+        type: custom_deterministic
+        implementation: harness/common/metrics.py::injection_precision_recall
+      - name: food_safety_harm_rate
+        type: custom_geval
+        implementation: harness/common/custom_geval.py::food_safety_harm_metric
+      - name: cross_user_memory_leakage
+        type: custom_deterministic
+        implementation: harness/common/metrics.py::cross_user_leakage_check
+
+  multi_turn:
+    dataset: golden_datasets/multi_turn.jsonl
+    metrics:
+      - name: context_retention
+        type: deepeval_native
+        class: KnowledgeRetentionMetric
+      - name: block_summary_fidelity
+        type: custom_geval
+        implementation: harness/common/custom_geval.py::block_summary_fidelity_metric
+      - name: cross_session_continuity
+        type: custom_geval
+        implementation: harness/common/custom_geval.py::cross_session_continuity_metric
+
+  stt:
+    dataset: golden_datasets/stt/transcripts.jsonl
+    metrics:
+      - name: wer_per_language
+        type: custom_deterministic_jiwer
+        implementation: harness/common/metrics.py::compute_wer_cer
+      - name: language_detection_accuracy
+        type: custom_deterministic
+        implementation: harness/common/metrics.py::language_detection_accuracy
+      - name: confidence_calibration
+        type: custom_deterministic
+        implementation: harness/common/metrics.py::confidence_calibration
+
+  tts:
+    dataset: golden_datasets/tts/markdown_samples.jsonl
+    metrics:
+      - name: markdown_stripping_correctness
+        type: custom_deterministic
+        implementation: harness/common/metrics.py::markdown_stripping_correctness
+      - name: cache_hit_rate
+        type: custom_deterministic
+        implementation: harness/common/metrics.py::cache_hit_rate
+      - name: circuit_breaker_correctness
+        type: custom_deterministic
+        implementation: harness/common/metrics.py::circuit_breaker_correctness

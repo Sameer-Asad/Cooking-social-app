@@ -1,0 +1,58 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ./backend/app:/app/app
+      - ./media:/app/media
+    depends_on: []
+
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    # Same image as `backend` — only the startup command differs (Sec 12.2).
+    command: celery -A app.celery_app worker --loglevel=INFO
+    env_file: .env
+    volumes:
+      - ./backend/app:/app/app
+      - ./media:/app/media
+    depends_on: []
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    env_file: .env
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+
+  eval:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    # Reuses the backend image (same deps, incl. pytest — Sec 11.4).
+    # Mounts the whole project root (not just ./eval) so the on-disk
+    # layout inside the container exactly mirrors local dev — eval/'s
+    # sibling backend/ must be reachable at the same relative path for
+    # eval/pytest.ini's `pythonpath = .. ../backend` to resolve.
+    command: pytest /workspace/eval -v
+    working_dir: /workspace/eval
+    env_file: .env
+    volumes:
+      - .:/workspace
+      - ./media:/app/media
+    profiles: ["eval"]  # excluded from a plain `docker-compose up`
+
+# No redis/rabbitmq services here on purpose: Upstash Redis and CloudAMQP
+# are hosted free-tier services (Sec 2, 12.3) — backend and celery-worker
+# just connect out via the connection strings in .env.

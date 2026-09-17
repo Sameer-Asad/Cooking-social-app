@@ -1,0 +1,201 @@
+{
+  "category": "tts",
+  "generated_at": "20260916T102530Z",
+  "meta": {
+    "n_cases": 20
+  },
+  "metrics": {
+    "markdown_stripping_correctness": {
+      "all_clean": false,
+      "n_with_leftovers": 1,
+      "mean_similarity_to_expected": 0.9801860375239657,
+      "details": [
+        {
+          "id": "tts-001",
+          "construct": "bold",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Preheat the oven to 200°C before you start."
+        },
+        {
+          "id": "tts-002",
+          "construct": "italic",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Let the dough rest for at least 30 minutes."
+        },
+        {
+          "id": "tts-003",
+          "construct": "table",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 0.9076923076923077,
+          "actual_spoken": ", Step, Temp, Time, , Blanch, 325°F, 4-5 min, , Fry, 375°F, 2-3 min,"
+        },
+        {
+          "id": "tts-004",
+          "construct": "header",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Two-step fry method\nBlanch first, then finish frying hot."
+        },
+        {
+          "id": "tts-005",
+          "construct": "bullets",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Add salt\nAdd pepper\nStir well"
+        },
+        {
+          "id": "tts-006",
+          "construct": "link",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "See this guide for more detail."
+        },
+        {
+          "id": "tts-007",
+          "construct": "inline_code",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Set the oven to 220C fan mode."
+        },
+        {
+          "id": "tts-008",
+          "construct": "blockquote",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Tip: always taste as you go."
+        },
+        {
+          "id": "tts-009",
+          "construct": "bold_italic_combo",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Never skip the resting time."
+        },
+        {
+          "id": "tts-010",
+          "construct": "nested_bullets_bold",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Chicken: 500g, cubed\nYogurt: 1 cup"
+        },
+        {
+          "id": "tts-011",
+          "construct": "multiple_tables",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 0.7654320987654321,
+          "actual_spoken": ", A, B, , 1, 2, Second table:, C, D, , 3, 4,"
+        },
+        {
+          "id": "tts-012",
+          "construct": "header_with_bold",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Important Safety Note\nCook chicken to 165°F internal temp."
+        },
+        {
+          "id": "tts-013",
+          "construct": "underscore_bold",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Do not overcrowd the pan."
+        },
+        {
+          "id": "tts-014",
+          "construct": "underscore_italic",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Stir gently to avoid breaking the fish."
+        },
+        {
+          "id": "tts-015",
+          "construct": "long_reply_mixed",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 0.9446808510638298,
+          "actual_spoken": "Chicken Karahi\nStep 1: Heat oil.\nStep 2: Add chicken., Spice, Amount, , Cumin, 1 tsp, - Serve hot\nGarnish with coriander"
+        },
+        {
+          "id": "tts-016",
+          "construct": "no_markdown_control",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "This reply has no markdown formatting at all."
+        },
+        {
+          "id": "tts-017",
+          "construct": "asterisk_multiplication_edge_case",
+          "clean": false,
+          "leftover_symbols": [
+            "*"
+          ],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Multiply the recipe by 2*3 if serving a bigger group."
+        },
+        {
+          "id": "tts-018",
+          "construct": "pipe_in_sentence_not_table",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 0.9859154929577465,
+          "actual_spoken": "Use a wok, cast iron pan works too."
+        },
+        {
+          "id": "tts-019",
+          "construct": "table_separator_row_only",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Just text after a stray separator row."
+        },
+        {
+          "id": "tts-020",
+          "construct": "hash_in_ingredient",
+          "clean": true,
+          "leftover_symbols": [],
+          "similarity_to_expected": 1.0,
+          "actual_spoken": "Use grade #1 vanilla extract for best flavor."
+        }
+      ]
+    },
+    "cache_hit_rate": {
+      "hit_rate": 0.5,
+      "hits": 5,
+      "total": 10
+    },
+    "circuit_breaker_correctness": {
+      "accuracy": 1.0,
+      "n": 1,
+      "details": [
+        {
+          "consecutive_failures_injected": 3,
+          "expected": [
+            true,
+            true
+          ],
+          "actual": [
+            true,
+            true
+          ],
+          "correct": true
+        }
+      ]
+    }
+  }
+}

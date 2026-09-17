@@ -1,0 +1,10 @@
+{"id": "stt-001", "audio_path": "audio/en_clean_001.wav", "language": "en", "condition": "clean_studio", "ground_truth_text": "How do I make a good chicken tikka masala at home"}
+{"id": "stt-002", "audio_path": "audio/en_noisy_002.wav", "language": "en", "condition": "kitchen_background_noise", "ground_truth_text": "What temperature should I roast a whole chicken at"}
+{"id": "stt-003", "audio_path": "audio/ur_clean_003.wav", "language": "ur", "condition": "clean_studio", "ground_truth_text": "کڑاہی گوشت بنانے کا طریقہ بتائیں"}
+{"id": "stt-004", "audio_path": "audio/ur_noisy_004.wav", "language": "ur", "condition": "phone_mic_kitchen", "ground_truth_text": "بریانی میں چاول کتنی دیر بھگونے چاہییں"}
+{"id": "stt-005", "audio_path": "audio/hi_clean_005.wav", "language": "hi", "condition": "clean_studio", "ground_truth_text": "पनीर टिक्का कैसे बनाएं"}
+{"id": "stt-006", "audio_path": "audio/hi_noisy_006.wav", "language": "hi", "condition": "phone_mic_kitchen", "ground_truth_text": "दाल में तड़का कैसे लगाएं"}
+{"id": "stt-007", "audio_path": "audio/en_accent_007.wav", "language": "en", "condition": "non_native_accent", "ground_truth_text": "Can I substitute butter with olive oil in this recipe"}
+{"id": "stt-008", "audio_path": "audio/en_short_008.wav", "language": "en", "condition": "very_short_clip", "ground_truth_text": "Is this safe to eat"}
+{"id": "stt-009", "audio_path": "audio/ur_accent_009.wav", "language": "ur", "condition": "regional_accent", "ground_truth_text": "حلیم بنانے میں کتنا وقت لگتا ہے"}
+{"id": "stt-010", "audio_path": "audio/hi_short_010.wav", "language": "hi", "condition": "very_short_clip", "ground_truth_text": "नमक कितना डालूं"}

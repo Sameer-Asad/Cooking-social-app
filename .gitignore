@@ -1,0 +1,51 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+venv/
+.venv/
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+frontend/tsconfig.node.tsbuildinfo
+
+# Media uploads — cover BOTH the root-level and backend-level media
+# folders, since backend/media/ is the one that actually holds real
+# uploaded audio/images in this project.
+media/videos/*
+media/images/*
+media/audio/*
+!media/videos/.gitkeep
+!media/images/.gitkeep
+!media/audio/.gitkeep
+
+backend/media/videos/*
+backend/media/images/*
+backend/media/audio/*
+!backend/media/videos/.gitkeep
+!backend/media/images/.gitkeep
+!backend/media/audio/.gitkeep
+
+# Eval scratch output
+eval/tts_quality_samples/
+backend/eval/tts_quality_samples/
+
+# Build caches
+.vite/
+node_modules/.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Windows shortcuts (in case one reappears)
+*.lnk

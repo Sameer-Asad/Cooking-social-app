@@ -1,0 +1,20 @@
+{"id": "tts-001", "construct": "bold", "raw_markdown": "**Preheat** the oven to 200°C before you start.", "expected_spoken_text": "Preheat the oven to 200°C before you start."}
+{"id": "tts-002", "construct": "italic", "raw_markdown": "Let the dough rest for *at least* 30 minutes.", "expected_spoken_text": "Let the dough rest for at least 30 minutes."}
+{"id": "tts-003", "construct": "table", "raw_markdown": "| Step | Temp | Time |\n|------|------|------|\n| Blanch | 325°F | 4-5 min |\n| Fry | 375°F | 2-3 min |", "expected_spoken_text": "Step, Temp, Time. Blanch, 325°F, 4-5 min. Fry, 375°F, 2-3 min."}
+{"id": "tts-004", "construct": "header", "raw_markdown": "## Two-step fry method\nBlanch first, then finish frying hot.", "expected_spoken_text": "Two-step fry method\nBlanch first, then finish frying hot."}
+{"id": "tts-005", "construct": "bullets", "raw_markdown": "- Add salt\n- Add pepper\n- Stir well", "expected_spoken_text": "Add salt\nAdd pepper\nStir well"}
+{"id": "tts-006", "construct": "link", "raw_markdown": "See [this guide](https://example.com/guide) for more detail.", "expected_spoken_text": "See this guide for more detail."}
+{"id": "tts-007", "construct": "inline_code", "raw_markdown": "Set the oven to `220C` fan mode.", "expected_spoken_text": "Set the oven to 220C fan mode."}
+{"id": "tts-008", "construct": "blockquote", "raw_markdown": "> Tip: always taste as you go.", "expected_spoken_text": "Tip: always taste as you go."}
+{"id": "tts-009", "construct": "bold_italic_combo", "raw_markdown": "***Never*** skip the resting time.", "expected_spoken_text": "Never skip the resting time."}
+{"id": "tts-010", "construct": "nested_bullets_bold", "raw_markdown": "- **Chicken**: 500g, cubed\n- **Yogurt**: 1 cup", "expected_spoken_text": "Chicken: 500g, cubed\nYogurt: 1 cup"}
+{"id": "tts-011", "construct": "multiple_tables", "raw_markdown": "| A | B |\n|---|---|\n| 1 | 2 |\n\nSecond table:\n\n| C | D |\n|---|---|\n| 3 | 4 |", "expected_spoken_text": "A, B. 1, 2.\nSecond table:\nC, D. 3, 4."}
+{"id": "tts-012", "construct": "header_with_bold", "raw_markdown": "### **Important** Safety Note\nCook chicken to 165°F internal temp.", "expected_spoken_text": "Important Safety Note\nCook chicken to 165°F internal temp."}
+{"id": "tts-013", "construct": "underscore_bold", "raw_markdown": "__Do not__ overcrowd the pan.", "expected_spoken_text": "Do not overcrowd the pan."}
+{"id": "tts-014", "construct": "underscore_italic", "raw_markdown": "Stir _gently_ to avoid breaking the fish.", "expected_spoken_text": "Stir gently to avoid breaking the fish."}
+{"id": "tts-015", "construct": "long_reply_mixed", "raw_markdown": "## Chicken Karahi\n**Step 1**: Heat oil.\n**Step 2**: Add chicken.\n\n| Spice | Amount |\n|-------|--------|\n| Cumin | 1 tsp |\n\n- Serve hot\n- Garnish with coriander", "expected_spoken_text": "Chicken Karahi\nStep 1: Heat oil.\nStep 2: Add chicken.\nSpice, Amount. Cumin, 1 tsp.\nServe hot\nGarnish with coriander"}
+{"id": "tts-016", "construct": "no_markdown_control", "raw_markdown": "This reply has no markdown formatting at all.", "expected_spoken_text": "This reply has no markdown formatting at all."}
+{"id": "tts-017", "construct": "asterisk_multiplication_edge_case", "raw_markdown": "Multiply the recipe by 2*3 if serving a bigger group.", "expected_spoken_text": "Multiply the recipe by 2*3 if serving a bigger group."}
+{"id": "tts-018", "construct": "pipe_in_sentence_not_table", "raw_markdown": "Use a wok | cast iron pan works too.", "expected_spoken_text": "Use a wok , cast iron pan works too."}
+{"id": "tts-019", "construct": "table_separator_row_only", "raw_markdown": "|---|---|---|\nJust text after a stray separator row.", "expected_spoken_text": "Just text after a stray separator row."}
+{"id": "tts-020", "construct": "hash_in_ingredient", "raw_markdown": "Use grade #1 vanilla extract for best flavor.", "expected_spoken_text": "Use grade #1 vanilla extract for best flavor."}

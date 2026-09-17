@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff
+
+      - name: Lint (ruff check)
+        # Catches unused imports, undefined names, and other real bugs —
+        # not just style nits. continue-on-error lets this surface
+        # problems without blocking the whole workflow while the
+        # codebase's first lint pass is still being cleaned up; remove
+        # continue-on-error once the backend is lint-clean and you want
+        # this to actually gate merges.
+        run: ruff check .
+        continue-on-error: true
+
+      - name: Format check (ruff format --check)
+        # --check only reports what WOULD change — never rewrites files
+        # in CI. Run `ruff format .` locally yourself to apply fixes.
+        run: ruff format --check .
+        continue-on-error: true
+
+      - name: Verify the app imports cleanly
+        env:
+          GROQ_API_KEY: "dummy"
+          JWT_SECRET: "dummy"
+          DATABASE_URL: "postgresql+asyncpg://user:pass@localhost/db"
+          DATABASE_URL_SYNC: "postgresql://user:pass@localhost/db"
+          UPSTASH_REDIS_URL: "redis://localhost:6379"
+          QDRANT_URL: "http://localhost:6333"
+        run: python -c "from app.main import app; print('App imported successfully')"
+
+      # No pytest step: there are currently no test_*.py files in this
+      # project (only eval/'s LLM-judge harness, which is a different
+      # kind of check run separately, not via plain pytest discovery).
+      # Add a `pytest` step here once real test files exist — running it
+      # against zero tests now would be a false-positive green check.
+
+  frontend-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Type-check and build
+        run: npm run build

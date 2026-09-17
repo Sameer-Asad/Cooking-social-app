@@ -1,0 +1,20 @@
+{"id": "agent-001", "input": "What is Circassian chicken (Çerkez Tavuğu)?", "needs_tool": true, "expected_tools": ["web_search"], "reason": "obscure regional Turkish/Circassian dish"}
+{"id": "agent-002", "input": "How do I make Cochinita Pibil the traditional Yucatecan way?", "needs_tool": true, "expected_tools": ["web_search"], "reason": "specific regional Mexican technique, banana-leaf pit-roasting"}
+{"id": "agent-003", "input": "What exactly is Csárdásleves, the Hungarian dish?", "needs_tool": true, "expected_tools": ["web_search"], "reason": "very obscure Hungarian dish name"}
+{"id": "agent-004", "input": "Tell me about Jansson's Frestelse — what's actually in it?", "needs_tool": true, "expected_tools": ["web_search"], "reason": "specific Swedish dish name, regional"}
+{"id": "agent-005", "input": "What is Kare-Kare and what makes the sauce distinct?", "needs_tool": true, "expected_tools": ["web_search"], "reason": "specific Filipino peanut-stew dish, regional detail needed"}
+{"id": "agent-006", "input": "What is Doro Wat traditionally served with at an Ethiopian meal?", "needs_tool": true, "expected_tools": ["web_search"], "reason": "specific regional serving-tradition question"}
+{"id": "agent-007", "input": "What's the difference between Malabar and regular biryani?", "needs_tool": true, "expected_tools": ["web_search"], "reason": "specific regional Indian sub-variant comparison"}
+{"id": "agent-008", "input": "What is a Cornish pasty's traditional crimping technique called?", "needs_tool": true, "expected_tools": ["web_search"], "reason": "very specific regional British technique/terminology"}
+{"id": "agent-009", "input": "What exactly is Khoresh Fesenjan and what nuts does it use?", "needs_tool": true, "expected_tools": ["web_search"], "reason": "specific Persian dish, ingredient detail"}
+{"id": "agent-010", "input": "What is Poutine Râpée from Acadia (not the fries dish)?", "needs_tool": true, "expected_tools": ["web_search"], "reason": "obscure Acadian dish, easily confused with the famous fries dish"}
+{"id": "agent-011", "input": "How do I boil an egg for exactly 7 minutes?", "needs_tool": false, "expected_tools": [], "reason": "common knowledge, no tool needed"}
+{"id": "agent-012", "input": "What's the difference between baking soda and baking powder?", "needs_tool": false, "expected_tools": [], "reason": "common cooking-science knowledge"}
+{"id": "agent-013", "input": "How do I make simple garlic butter for bread?", "needs_tool": false, "expected_tools": [], "reason": "very common, simple recipe"}
+{"id": "agent-014", "input": "What temperature is medium-rare for a steak?", "needs_tool": false, "expected_tools": [], "reason": "common knowledge, standard temp fact"}
+{"id": "agent-015", "input": "How do I make basic pancakes from scratch?", "needs_tool": false, "expected_tools": [], "reason": "extremely common recipe"}
+{"id": "agent-016", "input": "What's today's date? I want to note when I made this pickle batch.", "needs_tool": true, "expected_tools": ["current_datetime"], "reason": "explicit date request"}
+{"id": "agent-017", "input": "How long ago in days would a ferment started on the 1st of this month have gone, as of today?", "needs_tool": true, "expected_tools": ["current_datetime"], "reason": "needs current date to compute elapsed days"}
+{"id": "agent-018", "input": "How do I caramelize onions properly without burning them?", "needs_tool": false, "expected_tools": [], "reason": "common technique question"}
+{"id": "agent-019", "input": "What's a good substitute for buttermilk if I don't have any?", "needs_tool": false, "expected_tools": [], "reason": "common substitution knowledge"}
+{"id": "agent-020", "input": "What day of the week is it today? I'm planning my weekly meal prep.", "needs_tool": true, "expected_tools": ["current_datetime"], "reason": "explicit day-of-week request"}

@@ -1,0 +1,445 @@
+@import "./tokens.css";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--turmeric-deep);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ── App shell ─────────────────────────────────────────────────────── */
+
+.app-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-4) var(--space-4);
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.wordmark-mark {
+  color: var(--turmeric-deep);
+}
+
+.tab-nav {
+  display: flex;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--steam-line);
+}
+
+.tab-nav button {
+  background: none;
+  border: none;
+  padding: var(--space-3) var(--space-2);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tab-nav button.active {
+  color: var(--ink);
+  border-bottom-color: var(--turmeric);
+}
+
+.view {
+  flex: 1;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ── Recipe card — signature element ──────────────────────────────────
+   Every bot reply renders as a torn-edge card, like a recipe clipped
+   from a larger sheet. The language badge is real information (AC-1's
+   detected language + Sec 3.1's confidence signal), not decoration. */
+
+.recipe-card {
+  position: relative;
+  background: var(--steam);
+  border: 1px solid var(--steam-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  max-width: 88%;
+}
+
+.recipe-card::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: var(--space-4);
+  right: var(--space-4);
+  height: 6px;
+  background-image: linear-gradient(
+    135deg,
+    var(--paper) 25%,
+    transparent 25%
+  ),
+    linear-gradient(-135deg, var(--paper) 25%, transparent 25%);
+  background-position: 0 0;
+  background-size: 10px 10px;
+  background-repeat: repeat-x;
+}
+
+.recipe-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  background: var(--paper);
+  border: 1px solid var(--steam-line);
+  border-radius: var(--radius-pill);
+  padding: 2px var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.recipe-card-badge.low-confidence {
+  color: var(--chili);
+  border-color: var(--chili);
+}
+
+.recipe-card-text {
+  white-space: pre-wrap;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.recipe-card audio {
+  width: 100%;
+  margin-top: var(--space-3);
+  height: 32px;
+}
+
+.recipe-card-degraded {
+  margin-top: var(--space-3);
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+/* ── Chat ──────────────────────────────────────────────────────────── */
+
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+}
+
+.message-row {
+  display: flex;
+}
+
+.message-row.user {
+  justify-content: flex-end;
+}
+
+.message-row.assistant {
+  justify-content: flex-start;
+}
+
+.user-bubble {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: var(--radius-card);
+  padding: var(--space-3) var(--space-4);
+  max-width: 88%;
+  font-size: 15px;
+}
+
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-top: 1px solid var(--steam-line);
+  padding-top: var(--space-4);
+}
+
+.edit-review-banner {
+  font-size: 12px;
+  color: var(--chili);
+  background: color-mix(in srgb, var(--chili) 8%, var(--paper));
+  border: 1px solid var(--chili);
+  border-radius: var(--radius-card);
+  padding: var(--space-2) var(--space-3);
+}
+
+.composer-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-end;
+}
+
+.composer-row textarea {
+  flex: 1;
+  resize: none;
+  border: 1px solid var(--steam-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-3);
+  background: var(--steam);
+  color: var(--ink);
+  min-height: 44px;
+  max-height: 140px;
+}
+
+.icon-button {
+  border: 1px solid var(--steam-line);
+  background: var(--steam);
+  border-radius: var(--radius-card);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.icon-button.recording {
+  background: var(--chili);
+  border-color: var(--chili);
+  color: var(--paper);
+}
+
+.send-button {
+  background: var(--turmeric);
+  color: var(--ink);
+  border: none;
+  border-radius: var(--radius-card);
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.send-button:hover:not(:disabled) {
+  background: var(--turmeric-deep);
+}
+
+.send-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Feed ──────────────────────────────────────────────────────────── */
+
+.feed-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.primary-button {
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: var(--radius-card);
+  padding: var(--space-2) var(--space-4);
+  font-weight: 500;
+  font-size: 14px;
+  transition: opacity 0.15s ease;
+}
+
+.primary-button:hover {
+  opacity: 0.85;
+}
+
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.post-card {
+  border: 1px solid var(--steam-line);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--steam);
+}
+
+.post-media {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  display: block;
+  background: var(--ink);
+}
+
+.post-body {
+  padding: var(--space-4);
+}
+
+.post-description {
+  margin: 0 0 var(--space-3);
+  color: var(--ink);
+}
+
+.post-actions {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  transition: color 0.15s ease;
+}
+
+.action-button:hover {
+  color: var(--ink);
+}
+
+.action-button.liked {
+  color: var(--cardamom);
+  font-weight: 500;
+}
+
+.comment-list {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.comment-row {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.comment-form {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.comment-form input {
+  flex: 1;
+  border: 1px solid var(--steam-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper);
+}
+
+/* ── Auth ──────────────────────────────────────────────────────────── */
+
+.auth-shell {
+  max-width: 380px;
+  margin: var(--space-7) auto;
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.auth-shell form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.auth-shell input {
+  border: 1px solid var(--steam-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-3);
+  background: var(--steam);
+  color: var(--ink);
+}
+
+.auth-toggle {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  font-size: 13px;
+  text-decoration: underline;
+  align-self: flex-start;
+}
+
+.error-text {
+  color: var(--chili);
+  font-size: 13px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-7) var(--space-4);
+  color: var(--ink-faint);
+}

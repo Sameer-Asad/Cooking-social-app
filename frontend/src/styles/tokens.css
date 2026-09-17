@@ -1,0 +1,48 @@
+:root {
+  /* Palette — spice-rack, not the generic cream+terracotta AI look.
+     Named after the kitchen materials they represent. */
+  --ink: #201c16; /* charcoal, primary text + dark surfaces */
+  --paper: #fbf7ee; /* warm page background */
+  --steam: #ede7d9; /* card surface, one step darker than paper */
+  --steam-line: #ddd4bf; /* hairline borders on steam surfaces */
+  --turmeric: #e0a628; /* primary accent — spice, action */
+  --turmeric-deep: #b3821c; /* hover/active state of primary */
+  --chili: #c1442b; /* alerts, destructive, errors */
+  --cardamom: #4b5d45; /* success, active-like, confirmations */
+  --ink-soft: #55503f; /* secondary text on paper/steam */
+  --ink-faint: #8b8471; /* tertiary text, placeholders */
+
+  /* Type */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Work Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-card: 4px;
+  --radius-pill: 999px;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* The app is designed light-first (a recipe card reads like paper),
+     but respect a dark preference for the chrome without inverting the
+     "recipe card" surfaces, which lose their meaning if inverted. */
+  :root {
+    --paper: #16140f;
+    --steam: #211d16;
+    --steam-line: #332d20;
+    --ink: #f2ede0;
+    --ink-soft: #c9c0a8;
+    --ink-faint: #8b8471;
+    color-scheme: dark;
+  }
+}

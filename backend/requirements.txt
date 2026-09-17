@@ -1,0 +1,64 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.1
+email-validator==2.2.0
+
+# Async Postgres (Neon) — SQLAlchemy 2.0.33+ required, see Neon docs note
+# on idle-connection reuse bugs against scale-to-zero computes.
+sqlalchemy==2.0.36
+asyncpg==0.30.0
+psycopg2-binary==2.9.10
+alembic==1.14.0
+
+# Celery + brokers
+celery==5.4.0
+# CloudAMQP broker
+amqp==5.3.1
+
+# Standard Redis client (redis-py), connected to Upstash's standard
+# rediss:// TCP endpoint. Chosen over the upstash-redis HTTP SDK because
+# the atomic Lua token-bucket (Sec 8.1) needs EVAL/register_script, which
+# redis-py's documented Script API supports directly — same client also
+# used as the Celery result backend.
+redis==5.2.1
+
+# LLM
+groq==0.13.1
+
+# LangGraph / LangChain / LangSmith tracing
+langgraph==0.2.62
+langchain-core==0.3.28
+langsmith==0.2.10
+
+# STT / TTS
+# STT / TTS
+setuptools<81  # openai-whisper's legacy setup.py needs pkg_resources, removed in setuptools 81+
+openai-whisper==20240930
+gTTS==2.5.4
+langdetect==1.0.9
+
+# Vector DB (optional RAG)
+qdrant-client==1.12.1
+
+# Auth
+python-jose[cryptography]==3.3.0
+argon2-cffi==23.1.0
+httpx==0.28.1
+
+# Prompt-injection classifier
+sentence-transformers==3.3.1
+
+# Observability
+prometheus-client==0.21.1
+
+# Eval harness (Sec 11.4)
+pytest==8.3.4
+pytest-asyncio==0.25.2
+
+# Misc
+python-multipart==0.0.20
+python-dotenv==1.0.1
+
+pypdf
+python-docx
