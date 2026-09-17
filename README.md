@@ -26,7 +26,6 @@ A multilingual recipe Q&A bot (text or voice in, text + audio replies out) combi
 dastarkhwan/
 ├── backend/
 │   ├── app/
-│   ├── alembic/
 │   ├── eval/
 │   ├── Dockerfile
 │   └── requirements.txt
@@ -50,7 +49,6 @@ dastarkhwan/
 | Folder / File | Core Purpose & Responsibility |
 |---|---|
 | `backend/app/` | FastAPI application — routes, auth, the bot's LangGraph agent, RAG pipeline, rate limiting, and Celery task definitions |
-| `backend/alembic/` | Database migrations for the Postgres schema (users, conversations, messages, posts) |
 | `backend/eval/` | Offline evaluation harness — LLM-as-judge scoring against a golden dataset, run separately from normal CI |
 | `frontend/src/` | React + Vite client — chat UI, session sidebar, social feed, auth, and billing pages |
 | `media/` | Local-disk storage for uploaded post images/videos and generated TTS audio (dev only — swapped for object storage in production) |
