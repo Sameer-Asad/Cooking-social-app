@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PostCard } from "./PostCard";
 import { ApiError, feedApi, type Post } from "../api/client";
 
@@ -52,6 +52,20 @@ describe("PostCard", () => {
     vi.useRealTimers();
   });
 
+  // Runs AFTER setup.ts's global afterEach(cleanup()) has already unmounted
+  // the component — so any pending debounce timeout gets cancelled by
+  // PostCard's own cleanup effect while the SAME timer system that
+  // scheduled it (fake, in most tests here) is still active. Switching
+  // back to real timers mid-test (before unmount) was cancelling a fake
+  // timer ID with the real clearTimeout, which is a silent no-op — the
+  // orphaned fake timeout, and everything it closed over, never got
+  // freed. vi.clearAllTimers() is a belt-and-suspenders sweep for
+  // anything still pending regardless.
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+  });
+
   it("renders the heart already filled when the post was already liked (liked_by_me)", () => {
     render(<PostCard post={makePost({ liked_by_me: true, like_count: 5 })} />);
     const likeButton = screen.getByRole("button", { name: /unlike/i });
@@ -72,13 +86,13 @@ describe("PostCard", () => {
     const likeButton = screen.getByRole("button", { name: /^like/i });
     fireEvent.click(likeButton);
 
-    // Instant, optimistic UI flip — no network call yet.
+    // Instant, optimistic UI flip — no network call yet. Deliberately NOT
+    // advancing the fake timer here; the pending debounce timeout is left
+    // for the afterEach + unmount to clean up correctly.
     expect(likeButton).toHaveAttribute("aria-pressed", "true");
     expect(likeButton).toHaveTextContent("4");
     expect(mockedLike).not.toHaveBeenCalled();
     expect(mockedUnlike).not.toHaveBeenCalled();
-
-    vi.useRealTimers();
   });
 
   it("coalesces rapid like/unlike/like clicks into a single request reflecting the final choice", async () => {
@@ -95,8 +109,6 @@ describe("PostCard", () => {
 
     expect(mockedLike).toHaveBeenCalledTimes(1);
     expect(mockedUnlike).not.toHaveBeenCalled();
-
-    vi.useRealTimers();
   });
 
   it("resets the debounce timer on each click, so it only fires 350ms after the LAST click", async () => {
@@ -119,8 +131,6 @@ describe("PostCard", () => {
 
     await vi.advanceTimersByTimeAsync(100);
     expect(mockedLike).toHaveBeenCalledTimes(1); // fires only after a full quiet window
-
-    vi.useRealTimers();
   });
 
   it("rolls back the optimistic increment and shows an error on a failed like", async () => {
@@ -132,6 +142,9 @@ describe("PostCard", () => {
     fireEvent.click(likeButton);
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS + 10);
 
+    // Required here, not just decorative: findByText polls internally,
+    // and needs the real setTimeout to actually advance on its own.
+    // Timer already fired above, so nothing pending is left behind.
     vi.useRealTimers();
     await screen.findByText("Server error");
     expect(likeButton).toHaveTextContent("6");
@@ -153,8 +166,6 @@ describe("PostCard", () => {
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS + 10);
     expect(mockedUnlike).toHaveBeenCalledTimes(1);
     expect(mockedUnlike).toHaveBeenCalledWith("post-1");
-
-    vi.useRealTimers();
   });
 
   it("rolls back the optimistic decrement and shows an error on a failed unlike", async () => {
@@ -166,6 +177,8 @@ describe("PostCard", () => {
     fireEvent.click(likeButton);
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS + 10);
 
+    // Same reasoning as the failed-like test above: required for
+    // findByText's polling, safe because the timer already fired.
     vi.useRealTimers();
     await screen.findByText("Server error");
     expect(likeButton).toHaveTextContent("6");
