@@ -46,6 +46,11 @@ export function PostCard({ post }: Props) {
   const isMobile = useIsMobile();
 
   const desiredLikedRef = useRef(post.liked_by_me);
+  // Bumped only on a genuine user click — lets syncLikeState tell "the
+  // user toggled again mid-flight" apart from "my own rollback moved
+  // desiredLikedRef", which otherwise look identical and cause an
+  // infinite resync loop on every failed request.
+  const generationRef = useRef(0);
   const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const syncInFlightRef = useRef(false);
 
@@ -57,6 +62,7 @@ export function PostCard({ post }: Props) {
 
   async function syncLikeState() {
     const desired = desiredLikedRef.current;
+    const startGeneration = generationRef.current;
     syncInFlightRef.current = true;
     try {
       const result = desired ? await feedApi.like(post.id) : await feedApi.unlike(post.id);
@@ -65,7 +71,7 @@ export function PostCard({ post }: Props) {
     } catch (e) {
       setLiked(!desired);
       setLikeCount((c) => c + (desired ? -1 : 1));
-      desiredLikedRef.current = !desired;
+      desiredLikedRef.current = !desired; // rollback — does NOT bump generation
       setError(
         e instanceof ApiError
           ? e.message
@@ -75,10 +81,9 @@ export function PostCard({ post }: Props) {
       );
     } finally {
       syncInFlightRef.current = false;
-      // User may have toggled again after this request started but
-      // before it finished — if so, sync the latest desired state right
-      // away instead of waiting for another full debounce window.
-      if (desiredLikedRef.current !== desired) {
+      // Only resync if the user genuinely toggled again mid-flight —
+      // not if this generation's own rollback moved desiredLikedRef.
+      if (generationRef.current !== startGeneration) {
         syncLikeState();
       }
     }
@@ -89,6 +94,7 @@ export function PostCard({ post }: Props) {
     setLiked(next);
     setLikeCount((c) => c + (next ? 1 : -1));
     setError(null);
+    generationRef.current += 1;
     desiredLikedRef.current = next;
 
     if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
